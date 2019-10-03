@@ -14,6 +14,11 @@ PARSER:
   SourcesPaths: [lzfse.h]
 
 TRANSLATOR:
+  ConstRules:
+    defines: eval
+  PtrTips:
+    function:
+      - { target: ^lzfse_decode_buffer$, tips: [ref, 0, ref, 0, ref] }
   Rules:
     global:
       - { transform: lower }
