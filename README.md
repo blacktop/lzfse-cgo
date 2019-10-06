@@ -9,6 +9,14 @@ Go bindings for lzfse compression
 
 ---
 
+## Requirements
+
+### `macOS`
+
+```bash
+$ brew install lzfse
+```
+
 ## Install
 
 ```bash
