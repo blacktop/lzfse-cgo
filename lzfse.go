@@ -41,13 +41,12 @@ func DecodeScratchSize() uint {
 }
 
 // DecodeBuffer function as declared in go-lzfse/lzfse.h:126
-func DecodeBuffer(dstBuffer []byte, dstSize uint, srcBuffer string, srcSize uint, scratchBuffer []byte) uint {
-	cdstBuffer, _ := (*C.uint8_t)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&dstBuffer)).Data)), cgoAllocsUnknown
-	cdstSize, _ := (C.size_t)(dstSize), cgoAllocsUnknown
-	csrcBuffer, _ := unpackPUint8String(srcBuffer)
-	csrcSize, _ := (C.size_t)(srcSize), cgoAllocsUnknown
-	cscratchBuffer, _ := unsafe.Pointer((*C.uint8_t)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&dstBuffer)).Data))), cgoAllocsUnknown
-	__ret := C.lzfse_decode_buffer(cdstBuffer, cdstSize, csrcBuffer, csrcSize, cscratchBuffer)
+func DecodeBuffer(dstBuffer []byte, dstSize uint, srcBuffer []byte, srcSize uint, scratchBuffer []byte) uint {
+	cdstBuffer, _ := (*C.uint8_t)(unsafe.Pointer(&dstBuffer[0]))
+	csrcBuffer, _ := (*C.uint8_t)(unsafe.Pointer(&srcBuffer[0]))
+	cscratchBuffer, _ := (*C.uint8_t)(unsafe.Pointer(&scratchBuffer[0]))
+
+	__ret := C.lzfse_decode_buffer(cdstBuffer, (C.size_t)(dstSize), csrcBuffer, (C.size_t)(srcSize), cscratchBuffer)
 	__v := (uint)(__ret)
 	return __v
 }
