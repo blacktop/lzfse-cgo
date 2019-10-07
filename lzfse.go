@@ -41,8 +41,8 @@ func DecodeScratchSize() uint {
 }
 
 // DecodeBuffer function as declared in go-lzfse/lzfse.h:126
-func DecodeBuffer(srcBuffer string) []byte {
-	csrcBuffer, _ := unpackPUint8String(srcBuffer)
+func DecodeBuffer(srcBuffer []byte]) []byte {
+	csrcBuffer, _ := unpackPUint8String(string(srcBuffer))
 	csrcSize, _ := (C.size_t)(len(srcBuffer)), cgoAllocsUnknown
 
 	dstBuffer := make([]byte, 4*len(srcBuffer))
@@ -51,7 +51,6 @@ func DecodeBuffer(srcBuffer string) []byte {
 
 	scratch := make([]byte, DecodeScratchSize())
 	cscratchBuffer, _ := unsafe.Pointer(&scratch[0]), cgoAllocsUnknown
-	defer C.free(cscratchBuffer)
 
 	__ret := C.lzfse_decode_buffer(cdstBuffer, cdstSize, csrcBuffer, csrcSize, cscratchBuffer)
 	__v := (uint)(__ret)
