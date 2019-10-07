@@ -44,12 +44,10 @@ func DecodeScratchSize() uint {
 func DecodeBuffer(srcBuffer string) []byte {
 	csrcBuffer, _ := unpackPUint8String(srcBuffer)
 	csrcSize, _ := (C.size_t)(len(srcBuffer)), cgoAllocsUnknown
-	defer C.free(csrcBuffer)
 
 	dstBuffer := make([]byte, 4*len(srcBuffer))
 	cdstBuffer, _ := (*C.uint8_t)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&dstBuffer)).Data)), cgoAllocsUnknown
 	cdstSize, _ := (C.size_t)(4*len(srcBuffer)), cgoAllocsUnknown
-	defer C.free(cdstBuffer)
 
 	scratch := make([]byte, DecodeScratchSize())
 	cscratchBuffer, _ := unsafe.Pointer(&scratch[0]), cgoAllocsUnknown
