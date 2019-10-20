@@ -33,14 +33,14 @@ import (
 
 func main() {
 
-    dat, err := ioutil.ReadFile("kernelcache")
+    dat, err := ioutil.ReadFile("encoded.file")
     if err != nil {
         log.Fatal(errors.Wrap(err, "failed to read compressed file"))
     }
 
     decompressed = lzfse.DecodeBuffer(dat)
 
-    err = ioutil.WriteFile("kernelcache.decompressed", decompressed, 0644)
+    err = ioutil.WriteFile("decoded.file", decompressed, 0644)
     if err != nil {
         log.Fatal(errors.Wrap(err, "failed to decompress file"))
     }
