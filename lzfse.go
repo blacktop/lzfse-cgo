@@ -6,7 +6,9 @@
 package lzfse
 
 /*
-#cgo LDFLAGS: -L/usr/local/Cellar/lzfse/1.0/lib -L/usr/local/lib -llzfse
+#cgo windows LDFLAGS: -L${SRCDIR}\lzfse\build\Debug -llzfse
+#cgo linux LDFLAGS: -L/usr/local/lib -llzfse
+#cgo darwin LDFLAGS: -L/usr/local/Cellar/lzfse/1.0/lib -llzfse
 #include "lzfse.h"
 #include <stdlib.h>
 #include "cgo_helpers.h"
