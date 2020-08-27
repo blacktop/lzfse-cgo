@@ -45,17 +45,28 @@ func DecodeScratchSize() uint {
 
 // DecodeBuffer function as declared in go-lzfse/lzfse.h:126
 func DecodeBuffer(srcBuffer []byte) []byte {
-	csrcBuffer, _ := unpackPUint8String(string(srcBuffer))
-	csrcSize, _ := (C.size_t)(len(srcBuffer)), cgoAllocsUnknown
+	compRatio := 4
+	in, _ := unpackPUint8String(string(srcBuffer))
+	in_size, _ := (C.size_t)(len(srcBuffer)), cgoAllocsUnknown
 
-	dstBuffer := make([]byte, 6*len(srcBuffer))
-	cdstBuffer, _ := (*C.uint8_t)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&dstBuffer)).Data)), cgoAllocsUnknown
-	cdstSize, _ := (C.size_t)(6*len(srcBuffer)), cgoAllocsUnknown
+	dstBuffer := make([]byte, compRatio*len(srcBuffer))
+	out, _ := (*C.uint8_t)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&dstBuffer)).Data)), cgoAllocsUnknown
+	out_allocated, _ := (C.size_t)(compRatio*len(srcBuffer)), cgoAllocsUnknown
 
 	scratch := make([]byte, DecodeScratchSize())
-	cscratchBuffer, _ := unsafe.Pointer(&scratch[0]), cgoAllocsUnknown
+	aux, _ := unsafe.Pointer(&scratch[0]), cgoAllocsUnknown
 
-	__ret := C.lzfse_decode_buffer(cdstBuffer, cdstSize, csrcBuffer, csrcSize, cscratchBuffer)
-	__v := (uint)(__ret)
-	return dstBuffer[:__v]
+	for {
+		__ret := C.lzfse_decode_buffer(out, out_allocated, in, in_size, aux)
+		out_size := (C.size_t)(__ret)
+		// If output buffer was too small, grow and retry.
+		if out_size == 0 || out_size == out_allocated {
+			compRatio *= 2
+			dstBuffer = make([]byte, compRatio*len(srcBuffer))
+			out, _ = (*C.uint8_t)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&dstBuffer)).Data)), cgoAllocsUnknown
+			out_allocated, _ = (C.size_t)(compRatio*len(srcBuffer)), cgoAllocsUnknown
+		} else {
+			return dstBuffer[:out_size]
+		}
+	}
 }
