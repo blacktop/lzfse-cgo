@@ -25,3 +25,10 @@ jobs:
         name: Run tests
         run: |
           go test
+      -
+        name: Upload failure artifact
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: decoded-readme
+          path: fail.bin
