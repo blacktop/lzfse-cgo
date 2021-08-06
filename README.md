@@ -1,8 +1,8 @@
-# go-lzfse
+# lzfse-cgo
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/blacktop/go-lzfse/Go)
-[![GoDoc](https://godoc.org/github.com/blacktop/go-lzfse?status.svg)](https://godoc.org/github.com/blacktop/go-lzfse) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/blacktop/go-lzfse)](https://github.com/blacktop/go-lzfse/releases/latest)
-![GitHub](https://img.shields.io/github/license/blacktop/go-lzfse?color=blue)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/blacktop/lzfse-cgo/Go)
+[![GoDoc](https://godoc.org/github.com/blacktop/lzfse-cgo?status.svg)](https://godoc.org/github.com/blacktop/lzfse-cgo) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/blacktop/lzfse-cgo)](https://github.com/blacktop/lzfse-cgo/releases/latest)
+![GitHub](https://img.shields.io/github/license/blacktop/lzfse-cgo?color=blue)
 
 > Go bindings for [lzfse](https://github.com/lzfse/lzfse) compression.
 
@@ -11,7 +11,7 @@
 ## Install
 
 ```bash
-go get github.com/blacktop/go-lzfse
+go get github.com/blacktop/lzfse-cgo
 ```
 
 ## Getting Started
@@ -21,7 +21,7 @@ import (
     "io/ioutil"
     "log"
 
-    "github.com/blacktop/go-lzfse"
+    "github.com/blacktop/lzfse-cgo"
 )
 
 func main() {
@@ -42,7 +42,7 @@ func main() {
 
 ## Credit
 
-- <https://github.com/zchee/go-lzfse>
+- <https://github.com/zchee/lzfse-cgo>
 
 ## License
 

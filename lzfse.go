@@ -36,14 +36,14 @@ func unpackPUint8String(str string) (*C.uint8_t, *cgoAllocMap) {
 	return (*C.uint8_t)(h.Data), cgoAllocsUnknown
 }
 
-// EncodeScratchSize function as declared in go-lzfse/lzfse.h:56
+// EncodeScratchSize function as declared in lzfse.h:56
 func EncodeScratchSize() uint {
 	__ret := C.lzfse_encode_scratch_size()
 	__v := (uint)(__ret)
 	return __v
 }
 
-// EncodeBuffer function as declared in go-lzfse/lzfse.h:87
+// EncodeBuffer function as declared in lzfse.h:87
 func EncodeBuffer(dstBuffer []byte, dstSize uint, srcBuffer string, srcSize uint, scratchBuffer unsafe.Pointer) uint {
 	cdstBuffer, _ := (*C.uint8_t)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&dstBuffer)).Data)), cgoAllocsUnknown
 	cdstSize, _ := (C.size_t)(dstSize), cgoAllocsUnknown
@@ -55,14 +55,14 @@ func EncodeBuffer(dstBuffer []byte, dstSize uint, srcBuffer string, srcSize uint
 	return __v
 }
 
-// DecodeScratchSize function as declared in go-lzfse/lzfse.h:94
+// DecodeScratchSize function as declared in lzfse.h:94
 func DecodeScratchSize() uint {
 	__ret := C.lzfse_decode_scratch_size()
 	__v := (uint)(__ret)
 	return __v
 }
 
-// DecodeBuffer function as declared in go-lzfse/lzfse.h:126
+// DecodeBuffer function as declared in lzfse.h:126
 func DecodeBuffer(srcBuffer []byte) []byte {
 	compRatio := 4
 	in, _ := unpackPUint8String(string(srcBuffer))
