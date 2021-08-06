@@ -1,30 +1,20 @@
-MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-CURRENT_DIR := $(patsubst %/,%,$(dir $(MKFILE_PATH)))
+REPO=blacktop
+NAME=go-lzfse
+CUR_VERSION=$(shell svu current)
+NEXT_VERSION=$(shell svu patch)
 
-TARGET := lzfse.go
 
-all : $(TARGET)
+.PHONY: test
+test: ## Run tests
+	@echo " > Running tests\n"
+	@dist/arm64-cgo_darwin_amd64/disass  ../../Proteas/hello-mte/hello-mte _test
 
-build:
-	go build -v -x .
+.PHONY: release
+release: ## Create a new release from the NEXT_VERSION
+	@echo " > Creating Release ${NEXT_VERSION}"
+	@.hack/make/release ${NEXT_VERSION}
 
-install:
-	go install -v -x .
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-vendor/lzfse:
-	git submodule update --init
-	cd $(CURRENT_DIR)/vendor/lzfse && \
-	xcodebuild install DSTROOT=$(CURRENT_DIR) && \
-	mv $(CURRENT_DIR)/include/lzfse.h $(CURRENT_DIR) && \
-	${RM} -r $(CURRENT_DIR)/bin $(CURRENT_DIR)/include && \
-	chmod 644 $(CURRENT_DIR)/lzfse.h
-
-$(TARGET): lzfse.yml vendor/lzfse
-	@c-for-go lzfse.yml
-	@mv -f lzfse/* .
-	@${RM} -r lzfse
-
-clean:
-	${RM} -r lib vendor/lzfse
-
-.PHONY: build install clean
+.DEFAULT_GOAL := help

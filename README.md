@@ -1,18 +1,11 @@
 # go-lzfse
 
-[![GoDoc](https://godoc.org/github.com/blacktop/go-lzfse?status.svg)](https://godoc.org/github.com/blacktop/go-lzfse) [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)
+[![GoDoc](https://godoc.org/github.com/blacktop/go-lzfse?status.svg)](https://godoc.org/github.com/blacktop/go-lzfse) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/blacktop/go-lzfse)](https://github.com/blacktop/go-lzfse/releases/latest)
+![GitHub](https://img.shields.io/github/license/blacktop/go-lzfse?color=blue)
 
 > Go bindings for [lzfse](https://github.com/lzfse/lzfse) compression.
 
 ---
-
-## Requirements
-
-### `macOS`
-
-```bash
-$ brew install lzfse
-```
 
 ## Install
 
@@ -20,29 +13,28 @@ $ brew install lzfse
 go get github.com/blacktop/go-lzfse
 ```
 
-## Examples
+## Getting Started
 
 ```golang
 import (
     "io/ioutil"
     "log"
 
-    lzfse "github.com/blacktop/go-lzfse"
-    "github.com/pkg/errors"
+    "github.com/blacktop/go-lzfse"
 )
 
 func main() {
 
     dat, err := ioutil.ReadFile("encoded.file")
     if err != nil {
-        log.Fatal(errors.Wrap(err, "failed to read compressed file"))
+        log.Fatal(fmt.Errorf("failed to read compressed file: %v", err))
     }
 
     decompressed = lzfse.DecodeBuffer(dat)
 
     err = ioutil.WriteFile("decoded.file", decompressed, 0644)
     if err != nil {
-        log.Fatal(errors.Wrap(err, "failed to decompress file"))
+        log.Fatal(fmt.Errorf("failed to decompress file: %v", err))
     }
 }
 ```
@@ -53,4 +45,4 @@ func main() {
 
 ## License
 
-MIT Copyright (c) 2019 blacktop
+MIT Copyright (c) 2019-2021 blacktop
