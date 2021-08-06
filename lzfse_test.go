@@ -1,29 +1,18 @@
 package lzfse
 
 import (
-	"C"
-)
-import (
-	"reflect"
+	"io/ioutil"
 	"testing"
 )
 
 func TestDecodeBuffer(t *testing.T) {
-	type args struct {
-		srcBuffer []byte
+	wantBuf, err := ioutil.ReadFile("README.md")
+	if err != nil {
+		t.Errorf("failed to read test file 'README.md': %v", err)
 	}
-	tests := []struct {
-		name string
-		args args
-		want []byte
-	}{
-		// TODO: Add test cases.
+	encBuff, err := ioutil.ReadFile("test/enc.bin")
+	if err != nil {
+		t.Errorf("failed to read test file 'test/enc.bin': %v", err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := DecodeBuffer(tt.args.srcBuffer); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DecodeBuffer() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	testDecodeBuffer(t, encBuff, wantBuf)
 }

@@ -5,7 +5,35 @@ package lzfse
 #include <stdlib.h>
 */
 import "C"
-import "unsafe"
+import (
+	"reflect"
+	"sync"
+	"testing"
+	"unsafe"
+)
+
+type cgoAllocMap struct {
+	mux sync.RWMutex
+	m   map[unsafe.Pointer]struct{}
+}
+
+var cgoAllocsUnknown = new(cgoAllocMap)
+
+type sliceHeader struct {
+	Data unsafe.Pointer
+	Len  int
+	Cap  int
+}
+
+type stringHeader struct {
+	Data unsafe.Pointer
+	Len  int
+}
+
+func unpackPUint8String(str string) (*C.uint8_t, *cgoAllocMap) {
+	h := (*stringHeader)(unsafe.Pointer(&str))
+	return (*C.uint8_t)(h.Data), cgoAllocsUnknown
+}
 
 // EncodeScratchSize function as declared in go-lzfse/lzfse.h:56
 func EncodeScratchSize() uint {
@@ -59,4 +87,12 @@ func DecodeBuffer(srcBuffer []byte) []byte {
 			return dstBuffer[:out_size]
 		}
 	}
+}
+
+func testDecodeBuffer(t *testing.T, encBuf, wantBuf []byte) {
+	t.Run("README", func(t *testing.T) {
+		if got := DecodeBuffer(encBuff); !reflect.DeepEqual(got, wantBuf) {
+			t.Errorf("DecodeBuffer() = %v, want %v", got, wantBuf)
+		}
+	})
 }
