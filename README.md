@@ -1,5 +1,6 @@
 # go-lzfse
 
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/blacktop/go-lzfse/Go)
 [![GoDoc](https://godoc.org/github.com/blacktop/go-lzfse?status.svg)](https://godoc.org/github.com/blacktop/go-lzfse) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/blacktop/go-lzfse)](https://github.com/blacktop/go-lzfse/releases/latest)
 ![GitHub](https://img.shields.io/github/license/blacktop/go-lzfse?color=blue)
 
