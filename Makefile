@@ -7,7 +7,8 @@ NEXT_VERSION=$(shell svu patch)
 .PHONY: test
 test: ## Run tests
 	@echo " > Running tests\n"
-	@dist/arm64-cgo_darwin_amd64/disass  ../../Proteas/hello-mte/hello-mte _test
+	@lzfse -encode -i README.md -o test/enc.bin
+	@go test -v
 
 .PHONY: release
 release: ## Create a new release from the NEXT_VERSION
