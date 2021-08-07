@@ -30,5 +30,5 @@ jobs:
         uses: actions/upload-artifact@v2
         if: failure()
         with:
-          name: decoded-readme
-          path: fail.bin
+          name: decoded-output
+          path: fail.out

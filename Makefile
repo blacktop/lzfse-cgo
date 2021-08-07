@@ -7,7 +7,6 @@ NEXT_VERSION=$(shell svu patch)
 .PHONY: test
 test: ## Run tests
 	@echo " > Running tests\n"
-	@lzfse -encode -i README.md -o test/enc.bin
 	@go test -v
 
 .PHONY: release
