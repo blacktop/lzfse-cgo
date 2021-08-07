@@ -42,7 +42,7 @@ func main() {
 
 ## Credit
 
-- <https://github.com/zchee/lzfse-cgo>
+- <https://github.com/zchee/go-lzfse>
 
 ## License
 
