@@ -25,14 +25,92 @@ lzvn_decoder_state *lzvn_decoder_state_init(uint8_t * dst, size_t dst_size, cons
 	return state;
 }
 
+static inline int32_t offset_to_s32(lzvn_offset x) { return (int32_t)x; }
+
+static inline unsigned char *lzvn_copy8(unsigned char *restrict dst,
+                                        const unsigned char *restrict src,
+                                        size_t nbytes) {
+  for (size_t i = 0; i < nbytes; i++)
+    dst[i] = src[i];
+  return dst + nbytes;
+}
+
+static inline void lzvn_init_table(lzvn_encoder_state *state) {
+  lzvn_offset index = -LZVN_ENCODE_MAX_DISTANCE; // max match distance
+  if (index < state->src_begin)
+    index = state->src_begin;
+  uint32_t value = load4(state->src + index);
+
+  lzvn_encode_entry_type e;
+  for (int i = 0; i < 4; i++) {
+    e.indices[i] = offset_to_s32(index);
+    e.values[i] = value;
+  }
+  for (int u = 0; u < LZVN_ENCODE_HASH_VALUES; u++)
+    state->table[u] = e; // fill entire table
+}
+
+static inline unsigned char *emit_literal(const unsigned char *p,
+                                          unsigned char *q, unsigned char *q1,
+                                          size_t L) {
+  size_t x;
+  while (L > 15) {
+    x = L < 271 ? L : 271;
+    if (q + x + 10 >= q1)
+      goto OUT_FULL;
+    store2(q, 0xE0 + ((x - 16) << 8));
+    q += 2;
+    L -= x;
+    q = lzvn_copy8(q, p, x);
+    p += x;
+  }
+  if (L > 0) {
+    if (q + L + 10 >= q1)
+      goto OUT_FULL;
+    *q++ = 0xE0 + L; // 1110LLLL
+    q = lzvn_copy8(q, p, L);
+  }
+  return q;
+
+OUT_FULL:
+  return q1;
+}
+
+static inline lzvn_offset lzvn_emit_literal(lzvn_encoder_state *state,
+                                            lzvn_offset n) {
+  size_t L = (size_t)n;
+  unsigned char *dst = emit_literal(state->src + state->src_literal, state->dst,
+                                    state->dst_end, L);
+  // Check if DST is full
+  if (dst >= state->dst_end)
+    return 0; // FULL
+
+  // Update state
+  lzvn_offset dst_used = dst - state->dst;
+  state->dst = dst;
+  state->src_literal += n;
+  return dst_used;
+}
+
+static inline lzvn_offset lzvn_emit_end_of_stream(lzvn_encoder_state *state) {
+  // Do we have 8 byte in dst?
+  if (state->dst_end < state->dst + 8)
+    return 0; // FULL
+
+  // Insert end marker and update state
+  store8(state->dst, 0x06); // end-of-stream command
+  state->dst += 8;
+  return 8; // dst_used
+}
+
 lzvn_encoder_state *lzvn_encoder_state_init(uint8_t * dst, size_t dst_size, const uint8_t * src, size_t src_size) {
 	// Max input size check (limit to offsets on uint32_t).
 	if (src_size > LZVN_ENCODE_MAX_SRC_SIZE) {
-	src_size = LZVN_ENCODE_MAX_SRC_SIZE;
+		src_size = LZVN_ENCODE_MAX_SRC_SIZE;
 	}
 
 	lzvn_encoder_state *state = malloc(sizeof(lzvn_encoder_state));
-  	memset(&state, 0, sizeof(state));
+	memset(state, 0, sizeof(lzvn_encoder_state));
 
 	void *__restrict scratch_buffer = malloc(lzfse_encode_scratch_size() + 1);
 
@@ -45,6 +123,18 @@ lzvn_encoder_state *lzvn_encoder_state_init(uint8_t * dst, size_t dst_size, cons
 	state->dst_begin = dst;
 	state->dst_end = (unsigned char *)dst + dst_size - 8; // reserve 8 bytes for end-of-stream
 	state->table = scratch_buffer;
+	state->src_current_end = (lzvn_offset)src_size - LZVN_ENCODE_MIN_MARGIN;
+
+	lzvn_init_table(state);
+	lzvn_encode(state);
+
+	// No need to test the return value: src_literal will not be updated on failure,
+	// and we will fail later.
+	lzvn_emit_literal(state, state->src_end - state->src_literal);
+
+	// Restore original size, so end-of-stream always succeeds, and emit it
+	state->dst_end = (unsigned char *)dst + dst_size;
+	lzvn_emit_end_of_stream(state);
 
 	return state;
 }
@@ -141,7 +231,7 @@ func DecodeBuffer(srcBuffer []byte) []byte {
 
 // EncodeLZVNBuffer function as declared in lzvn_encode_base.c:383
 func EncodeLZVNBuffer(srcBuf []byte) []byte {
-	decBuf := make([]byte, len(srcBuf)*10)
+	decBuf := make([]byte, len(srcBuf)*4)
 
 	state := C.lzvn_encoder_state_init(
 		(*C.uint8_t)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&decBuf)).Data)),
@@ -151,8 +241,6 @@ func EncodeLZVNBuffer(srcBuf []byte) []byte {
 	)
 	defer C.free(unsafe.Pointer(state.table))
 	defer C.free(unsafe.Pointer(state))
-
-	C.lzvn_encode(state)
 
 	dstSize := (C.size_t)(*state.dst - *state.dst_begin)
 
