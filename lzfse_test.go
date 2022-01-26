@@ -16,3 +16,34 @@ func TestDecodeBuffer(t *testing.T) {
 	}
 	testDecodeBuffer(t, encBuff, wantBuf)
 }
+
+func TestDecodeLZVNBuffer(t *testing.T) {
+	wantBuf, err := ioutil.ReadFile("test/lzvn_dec.bin")
+	if err != nil {
+		t.Errorf("failed to read test file 'test/lzvn_dec.bin': %v", err)
+	}
+	encBuff, err := ioutil.ReadFile("test/lzvn_enc.bin")
+	if err != nil {
+		t.Errorf("failed to read test file 'test/lzvn_enc.bin': %v", err)
+	}
+	testDecodeLZVNBuffer(t, encBuff, wantBuf)
+}
+
+func TestEncodeLZVNBuffer(t *testing.T) {
+	wantBuf, err := ioutil.ReadFile("test/lzvn_enc.bin")
+	if err != nil {
+		t.Errorf("failed to read test file 'test/lzvn_enc.bin': %v", err)
+	}
+	srcBuff, err := ioutil.ReadFile("test/lzvn_dec.bin")
+	if err != nil {
+		t.Errorf("failed to read test file 'test/lzvn_dec.bin': %v", err)
+	}
+	testEncodeLZVNBuffer(t, srcBuff, wantBuf)
+}
+
+// func BenchmarkFib10(b *testing.B) {
+// 	// run the Fib function b.N times
+// 	for n := 0; n < b.N; n++ {
+// 		Fib(10)
+// 	}
+// }
