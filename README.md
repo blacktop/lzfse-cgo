@@ -43,7 +43,8 @@ func main() {
 ## Credit
 
 - <https://github.com/zchee/go-lzfse>
+- <https://github.com/eafer/libzbitmap>
 
 ## License
 
-MIT Copyright (c) 2019-2021 blacktop
+MIT Copyright (c) 2019-2022 blacktop
