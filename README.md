@@ -18,22 +18,22 @@ go get github.com/blacktop/lzfse-cgo
 
 ```golang
 import (
-    "io/ioutil"
     "log"
+    "os"
 
     "github.com/blacktop/lzfse-cgo"
 )
 
 func main() {
 
-    dat, err := ioutil.ReadFile("encoded.file")
+    dat, err := os.ReadFile("encoded.file")
     if err != nil {
         log.Fatal(fmt.Errorf("failed to read compressed file: %v", err))
     }
 
     decompressed = lzfse.DecodeBuffer(dat)
 
-    err = ioutil.WriteFile("decoded.file", decompressed, 0644)
+    err = os.WriteFile("decoded.file", decompressed, 0644)
     if err != nil {
         log.Fatal(fmt.Errorf("failed to decompress file: %v", err))
     }
@@ -47,4 +47,4 @@ func main() {
 
 ## License
 
-MIT Copyright (c) 2019-2022 blacktop
+MIT Copyright (c) 2019-2024 blacktop

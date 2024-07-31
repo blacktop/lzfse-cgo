@@ -36,7 +36,7 @@ size_t lzvn_decode_buffer(void *__restrict dst, size_t dst_size,
 import "C"
 import (
 	"bytes"
-	"io/ioutil"
+	"os"
 	"sync"
 	"testing"
 	"unsafe"
@@ -73,15 +73,15 @@ func EncodeScratchSize() uint {
 }
 
 // EncodeBuffer function as declared in lzfse.h:87
-func EncodeBuffer(dstBuffer []byte, dstSize uint, srcBuffer string, srcSize uint, scratchBuffer unsafe.Pointer) uint {
+func EncodeBuffer(srcBuffer []byte) []byte {
+	csrcBuffer, _ := unpackPUint8String(string(srcBuffer))
+	csrcSize, _ := (C.size_t)(len(srcBuffer)), cgoAllocsUnknown
+	dstBuffer := make([]byte, len(srcBuffer)*2)
 	cdstBuffer, _ := (*C.uint8_t)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&dstBuffer)).Data)), cgoAllocsUnknown
-	cdstSize, _ := (C.size_t)(dstSize), cgoAllocsUnknown
-	csrcBuffer, _ := unpackPUint8String(srcBuffer)
-	csrcSize, _ := (C.size_t)(srcSize), cgoAllocsUnknown
-	cscratchBuffer, _ := scratchBuffer, cgoAllocsUnknown
-	__ret := C.lzfse_encode_buffer(cdstBuffer, cdstSize, csrcBuffer, csrcSize, cscratchBuffer)
-	__v := (uint)(__ret)
-	return __v
+	cdstSize, _ := (C.size_t)(len(dstBuffer)), cgoAllocsUnknown
+	__ret := C.lzfse_encode_buffer(cdstBuffer, cdstSize, csrcBuffer, csrcSize, nil)
+	out_size := (C.size_t)(__ret)
+	return dstBuffer[:out_size]
 }
 
 // DecodeScratchSize function as declared in lzfse.h:94
@@ -151,8 +151,17 @@ func DecodeLZVNBuffer(encBuf, decBuf []byte) uint {
 
 func testDecodeBuffer(t *testing.T, encBuf, wantBuf []byte) {
 	t.Run("README", func(t *testing.T) {
-		if got := DecodeBuffer(encBuf); !bytes.Contains(got, wantBuf) {
-			ioutil.WriteFile("fail.out", got, 0755)
+		if got := DecodeBuffer(encBuf); !bytes.Equal(got, wantBuf) {
+			os.WriteFile("fail.out", got, 0755)
+			t.Errorf("DecodeBuffer() = %v, want %v", got, wantBuf)
+		}
+	})
+}
+
+func testEncodeBuffer(t *testing.T, encBuf, wantBuf []byte) {
+	t.Run("README", func(t *testing.T) {
+		if got := EncodeBuffer(encBuf); !bytes.Equal(got, wantBuf) {
+			os.WriteFile("fail.out", got, 0755)
 			t.Errorf("DecodeBuffer() = %v, want %v", got, wantBuf)
 		}
 	})
@@ -162,7 +171,7 @@ func testDecodeLZVNBuffer(t *testing.T, encBuf, wantBuf []byte) {
 	t.Run("test/lzvn_enc.bin", func(t *testing.T) {
 		got := make([]byte, 68608)
 		if DecodeLZVNBuffer(encBuf, got); !bytes.Contains(got, wantBuf) {
-			if err := ioutil.WriteFile("fail.out", got, 0755); err != nil {
+			if err := os.WriteFile("fail.out", got, 0755); err != nil {
 				t.Errorf("failed to write fail.out: %v", err)
 			}
 			t.Errorf("DecodeLZVNBuffer() = %v, want %v", got, wantBuf)
@@ -174,7 +183,7 @@ func testEncodeLZVNBuffer(t *testing.T, srcBuf, wantBuf []byte) {
 	t.Run("test/lzvn_dec.bin", func(t *testing.T) {
 		got := make([]byte, len(srcBuf)*4)
 		if EncodeLZVNBuffer(srcBuf, got); !bytes.Contains(got, wantBuf) {
-			if err := ioutil.WriteFile("fail.out", got, 0755); err != nil {
+			if err := os.WriteFile("fail.out", got, 0755); err != nil {
 				t.Errorf("failed to write fail.out: %v", err)
 			}
 			t.Errorf("EncodeLZVNBuffer() = %v, want %v", got, wantBuf)
