@@ -91,6 +91,60 @@ func DecodeScratchSize() uint {
 	return __v
 }
 
+// DecodeBufferInto decodes LZFSE compressed data into a pre-allocated destination buffer.
+// This is more efficient than DecodeBuffer when the decompressed size is known,
+// as it avoids the allocation doubling loop.
+//
+// Returns the number of bytes written to dst, or 0 on failure.
+// If dst is too small, returns 0 (caller should provide a larger buffer).
+//
+// Example usage with sync.Pool for high-performance scenarios:
+//
+//	var bufPool = sync.Pool{
+//		New: func() any { return make([]byte, 1<<20) }, // 1MB buffers
+//	}
+//
+//	func decompress(compressed []byte, expectedSize int) []byte {
+//		buf := bufPool.Get().([]byte)
+//		if cap(buf) < expectedSize {
+//			buf = make([]byte, expectedSize)
+//		}
+//		buf = buf[:expectedSize]
+//		n := lzfse.DecodeBufferInto(compressed, buf)
+//		if n == 0 {
+//			bufPool.Put(buf)
+//			return nil
+//		}
+//		// Remember to return buf to pool when done
+//		return buf[:n]
+//	}
+func DecodeBufferInto(src, dst []byte) int {
+	if len(src) == 0 || len(dst) == 0 {
+		return 0
+	}
+	scratch := make([]byte, DecodeScratchSize())
+	return DecodeBufferWithScratch(src, dst, scratch)
+}
+
+// DecodeBufferWithScratch decodes LZFSE data into dst using a provided scratch buffer.
+// The scratch buffer must be at least DecodeScratchSize() bytes.
+// This variant allows full control over all allocations for maximum performance.
+//
+// Returns the number of bytes written to dst, or 0 on failure.
+func DecodeBufferWithScratch(src, dst, scratch []byte) int {
+	if len(src) == 0 || len(dst) == 0 || len(scratch) < int(DecodeScratchSize()) {
+		return 0
+	}
+	ret := C.lzfse_decode_buffer(
+		(*C.uint8_t)(unsafe.Pointer(&dst[0])),
+		(C.size_t)(len(dst)),
+		(*C.uint8_t)(unsafe.Pointer(&src[0])),
+		(C.size_t)(len(src)),
+		unsafe.Pointer(&scratch[0]),
+	)
+	return int(ret)
+}
+
 // DecodeBuffer function as declared in lzfse.h:126
 func DecodeBuffer(srcBuffer []byte) []byte {
 	compRatio := 4
