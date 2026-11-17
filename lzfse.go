@@ -179,7 +179,7 @@ func DecodeBuffer(srcBuffer []byte) []byte {
 
 // EncodeLZVNBuffer function as declared in lzvn_encode_base.c:383
 func EncodeLZVNBuffer(srcBuf, dstBuf []byte) uint {
-	scratch := make([]byte, DecodeScratchSize())
+	scratch := make([]byte, C.lzvn_encode_scratch_size())
 	__ret := C.lzvn_encode_buffer(
 		unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&dstBuf)).Data),
 		(C.size_t)(len(dstBuf)),

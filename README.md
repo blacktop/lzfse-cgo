@@ -1,6 +1,6 @@
 # lzfse-cgo
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/blacktop/lzfse-cgo/Go)
+[![Go](https://github.com/blacktop/lzfse-cgo/actions/workflows/go.yml/badge.svg)](https://github.com/blacktop/lzfse-cgo/actions/workflows/go.yml)
 [![GoDoc](https://godoc.org/github.com/blacktop/lzfse-cgo?status.svg)](https://godoc.org/github.com/blacktop/lzfse-cgo) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/blacktop/lzfse-cgo)](https://github.com/blacktop/lzfse-cgo/releases/latest)
 ![GitHub](https://img.shields.io/github/license/blacktop/lzfse-cgo?color=blue)
 
