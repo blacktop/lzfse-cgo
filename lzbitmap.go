@@ -14,12 +14,18 @@ import (
 )
 
 func LzBitMapDecompress(src, dst []byte) int {
-	var outLen C.size_t
-	return int(C.zbm_decompress(
+	status, _ := LzBitMapDecompressLen(src, dst)
+	return status
+}
+
+func LzBitMapDecompressLen(src, dst []byte) (status int, outLen int) {
+	var tempOutLen C.size_t
+	status = int(C.zbm_decompress(
 		unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&dst)).Data),
 		(C.size_t)(len(dst)),
 		unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&src)).Data),
 		(C.size_t)(len(src)),
-		(*C.size_t)(unsafe.Pointer(&outLen)),
+		(*C.size_t)(unsafe.Pointer(&tempOutLen)),
 	))
+	return status, int(tempOutLen)
 }
